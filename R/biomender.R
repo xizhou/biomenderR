@@ -25,8 +25,9 @@
 #' }
 biomender <- function(x,k=10)
 {
-   .prepare_fun <- function(x)
+   .prepare_fun <- function(x,h)
    {
+      require(data.table)
       s <- stopwords::stopwords(source="stopwords-iso")
       x <- tolower(x)
       x <- gsub('\\(.*?\\)', '',x)
@@ -35,7 +36,18 @@ biomender <- function(x,k=10)
       x <- lapply(x,FUN=function(x) gsub("^[0-9].*","",x))
       x <- lapply(x,FUN=function(x) x[!x==""])
       x <- lapply(x,textstem::stem_words)
-      x <- sapply(x,FUN=function(x) paste(x, collapse = " "))
+      for(i in seq(x))
+      {
+         xi <- x[[i]]
+         x1i <- xi[-length(xi)]
+         x2i <- xi[-1]
+         p <- paste(x1i,x2i,sep=" ")
+         id <- match(p,h[,"x"])
+         p <- h[,"ids"][id]
+         p <- p[!is.na(p)]
+         x[[i]] <- paste0(c(xi,p),collapse=" ")
+      }
+      x <- unlist(x)
       x
    }
    
@@ -43,9 +55,10 @@ biomender <- function(x,k=10)
    #giturl <- "https://raw.github.com/Miao-zhou/biomenderR/main/biomenderR.ruimtehol"
    #download.file(url,temp)
    
-   model <- system.file("extdata","biomenderR.ruimtehol",package ="biomenderR")
+   model <- system.file("extdata","biomenderR_compress.ruimtehol",package ="biomenderR")
+   h <- readRDS(model)$hash_index
    model <- ruimtehol::starspace_load_model(model)
-   x1 <- .prepare_fun(x)
+   x1 <- .prepare_fun(x,h)
    p <- predict(model,x1,k=k)
    p <- lapply(p,function(x) x$prediction$label)
    do.call("rbind",p)   
