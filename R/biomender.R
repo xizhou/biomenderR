@@ -42,8 +42,8 @@ biomender <- function(x,k=10)
          x1i <- xi[-length(xi)]
          x2i <- xi[-1]
          p <- paste(x1i,x2i,sep=" ")
-         id <- match(p,h[,"x"])
-         p <- h[,"ids"][id]
+         id <- match(p,h[[]"x"]])
+         p <- h[["ids"]][id]
          p <- p[!is.na(p)]
          x[[i]] <- paste0(c(xi,p),collapse=" ")
       }
